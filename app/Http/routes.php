@@ -33,8 +33,20 @@ Route::group(['middleware' => 'api', 'prefix' => 'api'], function() {
     Route::get('/stations', function() {
         return App\Station::all();
     });
+    Route::post('/station', function() {
+        $station = App\Station::where('unique_id', '=', request()->input('unique_id', ''))->firstOrFail();
 
-    Route::post('/stations', function() {
+        $aerometric = new App\Aerometric();
+        $aerometric->station_id = $station->id;
+        foreach(array_keys(config('aerometrics.properties')) as $property) {
+            $aerometric->{$property} = request()->input($property, '0.0');
+        }
+        $aerometric->save();
+
+        return ['success' => true];
+    });
+    
+    Route::get('/station', function() {
         $station = App\Station::where('unique_id', '=', request()->input('unique_id', ''))->firstOrFail();
 
         $aerometric = new App\Aerometric();
